@@ -729,6 +729,24 @@ export default function App() {
     }
   };
 
+  const deleteResource = async (resourceId: string) => {
+    if (!data) return;
+    const resource = data.resources.find((item) => item.id === resourceId);
+    try {
+      await api.deleteResource(resourceId, { userId });
+      const remainingInSession = data.resources.filter(
+        (item) => item.id !== resourceId && item.sessionId === resource?.sessionId,
+      );
+      if (selectedResourceId === resourceId) {
+        setSelectedResourceId(remainingInSession[0]?.id ?? "");
+      }
+      setOperationNotice(`已删除资源：${resource?.title ?? resourceId}`);
+      await refresh();
+    } catch (actionError) {
+      setOperationNotice(actionError instanceof Error ? actionError.message : "删除资源失败");
+    }
+  };
+
   const createSession = async (unitId: string) => {
     if (!data) return;
     const count = data.sessions.filter((session) => session.unitId === unitId).length + 1;
@@ -1183,6 +1201,7 @@ export default function App() {
               setSelectedResourceId(firstResource?.id ?? "");
             }}
             onSelectResource={setSelectedResourceId}
+            onDeleteResource={(resourceId) => void deleteResource(resourceId)}
             onAiInput={setAiInput}
             onAskAi={(message, mode) => void askAi(message, mode)}
           />
@@ -1206,6 +1225,7 @@ export default function App() {
             onUpdateSessionBlock={(sessionId, blockId, input) => void updateSessionBlock(sessionId, blockId, input)}
             onDeleteSessionBlock={(sessionId, blockId) => void deleteSessionBlock(sessionId, blockId)}
             onCreateResource={() => void createResource()}
+            onDeleteResource={(resourceId) => void deleteResource(resourceId)}
             onCreateUser={(input) => void createUser(input)}
             onCreateQuestion={(input) => void createQuestion(input)}
             onUpdateQuestion={(questionId, input) => void updateQuestion(questionId, input)}
@@ -1467,6 +1487,7 @@ function ResourcesPage({
   aiBusy,
   onSelectSession,
   onSelectResource,
+  onDeleteResource,
   onAiInput,
   onAskAi,
 }: {
@@ -1482,6 +1503,7 @@ function ResourcesPage({
   aiBusy: boolean;
   onSelectSession: (sessionId: string) => void;
   onSelectResource: (resourceId: string) => void;
+  onDeleteResource: (resourceId: string) => void;
   onAiInput: (value: string) => void;
   onAskAi: (message: string, mode?: "explain" | "quiz" | "summary" | "resource") => void;
 }) {
@@ -1547,15 +1569,26 @@ function ResourcesPage({
             sessionResources.map((resource) => {
               const Icon = resourceMeta[resource.type].icon;
               return (
-                <button
-                  key={resource.id}
-                  className={className("resource-tab", selectedResourceId === resource.id && "active")}
-                  onClick={() => onSelectResource(resource.id)}
-                >
-                  <Icon size={17} />
-                  <span>{resource.title}</span>
-                  <small>{resourceMeta[resource.type].label}</small>
-                </button>
+                <div className="resource-tab-item" key={resource.id}>
+                  <button
+                    className={className("resource-tab", selectedResourceId === resource.id && "active")}
+                    onClick={() => onSelectResource(resource.id)}
+                  >
+                    <Icon size={17} />
+                    <span>{resource.title}</span>
+                    <small>{resourceMeta[resource.type].label}</small>
+                  </button>
+                  {role === "admin" && (
+                    <button
+                      className="resource-delete-button"
+                      onClick={() => onDeleteResource(resource.id)}
+                      title={`删除 ${resource.title}`}
+                    >
+                      <Trash2 size={15} />
+                      删除
+                    </button>
+                  )}
+                </div>
               );
             })
           )}
@@ -1867,18 +1900,34 @@ function SessionEditor({
     rememberEditorSelection();
   };
 
+  const moveCaretToInsertedParagraph = (markerId: string) => {
+    const marker = editorRef.current?.querySelector<HTMLParagraphElement>(`p[data-editor-caret="${markerId}"]`);
+    const selection = window.getSelection();
+    if (!marker || !selection) return;
+    marker.removeAttribute("data-editor-caret");
+    const range = document.createRange();
+    range.setStart(marker, 0);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedSelectionRef.current = range.cloneRange();
+  };
+
   const insertMediaIntoEditor = (type: "image" | "audio" | "video", file?: File) => {
     if (!file) return;
     void readFileAsDataUrl(file).then((url) => {
+      restoreEditorSelection();
       editorRef.current?.focus();
-      const label = file.name.replace(/\.[^.]+$/, "");
+      const label = escapeHtml(file.name.replace(/\.[^.]+$/, ""));
+      const markerId = makeClientId("caret");
       const html =
         type === "image"
-          ? `<figure><img src="${url}" alt="${label}" /><figcaption>${label}</figcaption></figure>`
+          ? `<figure><img src="${url}" alt="${label}" /><figcaption>${label}</figcaption></figure><p data-editor-caret="${markerId}"><br></p>`
           : type === "video"
-            ? `<figure><video src="${url}" controls></video><figcaption>${label}</figcaption></figure>`
-          : `<figure><audio src="${url}" controls></audio><figcaption>${label}</figcaption></figure>`;
+            ? `<figure><video src="${url}" controls></video><figcaption>${label}</figcaption></figure><p data-editor-caret="${markerId}"><br></p>`
+          : `<figure><audio src="${url}" controls></audio><figcaption>${label}</figcaption></figure><p data-editor-caret="${markerId}"><br></p>`;
       document.execCommand("insertHTML", false, html);
+      moveCaretToInsertedParagraph(markerId);
     });
   };
 
@@ -2094,6 +2143,7 @@ function AdminPage({
   onUpdateSessionBlock,
   onDeleteSessionBlock,
   onCreateResource,
+  onDeleteResource,
   onCreateUser,
   onCreateQuestion,
   onUpdateQuestion,
@@ -2116,6 +2166,7 @@ function AdminPage({
   onUpdateSessionBlock: (sessionId: string, blockId: string, input: UpdateSessionBlockInput) => void;
   onDeleteSessionBlock: (sessionId: string, blockId: string) => void;
   onCreateResource: () => void;
+  onDeleteResource: (resourceId: string) => void;
   onCreateUser: (input: CreateUserInput) => void;
   onCreateQuestion: (input: CreateQuestionInput) => void;
   onUpdateQuestion: (questionId: string, input: UpdateQuestionInput) => void;
@@ -2132,6 +2183,7 @@ function AdminPage({
   const [unitActionNotice, setUnitActionNotice] = useState("");
   const session = data.sessions.find((item) => item.id === selectedSessionId) ?? data.sessions[0];
   const editingSession = session;
+  const selectedSessionResources = data.resources.filter((resource) => resource.sessionId === session?.id);
   const teachers = data.users.filter((user) => user.role === "teacher");
   const students = data.users.filter((user) => user.role === "student");
   const collator = useMemo(() => new Intl.Collator("zh-CN", { numeric: true, sensitivity: "base" }), []);
@@ -2307,7 +2359,29 @@ function AdminPage({
             </div>
             <div className="target-session">
               <CheckCircle2 size={17} />
-              将上传到：{session?.title ?? "当前章节"}
+              当前章节：{session?.title ?? "当前章节"} · 已绑定 {selectedSessionResources.length} 个资源
+            </div>
+            <div className="bound-resource-list">
+              {selectedSessionResources.length === 0 ? (
+                <div className="empty-state">该章节暂无绑定资源，上传后会显示在这里。</div>
+              ) : (
+                selectedSessionResources.map((resource) => {
+                  const Icon = resourceMeta[resource.type].icon;
+                  return (
+                    <article key={resource.id}>
+                      <Icon size={17} />
+                      <div>
+                        <strong>{resource.title}</strong>
+                        <span>{resourceMeta[resource.type].label} · {resource.fileName}</span>
+                      </div>
+                      <button className="danger-button" onClick={() => onDeleteResource(resource.id)}>
+                        <Trash2 size={15} />
+                        删除
+                      </button>
+                    </article>
+                  );
+                })
+              )}
             </div>
             <button className="primary-button" onClick={onCreateResource}>
               <CloudUpload size={18} />
@@ -3351,16 +3425,28 @@ function TeacherPage({
             </label>
           </div>
           <div className="question-list selectable">
-            {data.questions.map((question) => (
-              <button
-                key={question.id}
-                className={className(selectedQuestionIds.includes(question.id) && "active")}
-                onClick={() => toggleQuestion(question.id)}
-              >
-                <strong>{question.stem}</strong>
-                <span>{question.tags.join(" / ")} · {question.difficulty}</span>
-              </button>
-            ))}
+            {data.questions.map((question) => {
+              const mediaCount = question.media?.length ?? 0;
+              const subQuestionCount = question.subQuestions?.length ?? 0;
+              const extras = [
+                mediaCount ? `${mediaCount} 个媒体` : "",
+                subQuestionCount ? `${subQuestionCount} 个小题` : "",
+              ].filter(Boolean);
+              return (
+                <button
+                  key={question.id}
+                  className={className(selectedQuestionIds.includes(question.id) && "active")}
+                  onClick={() => toggleQuestion(question.id)}
+                >
+                  <span className="question-preview-meta">
+                    {questionTypeLabels[question.type]} · {difficultyLabels[question.difficulty]}
+                    {extras.length ? ` · ${extras.join(" · ")}` : ""}
+                  </span>
+                  <strong className="question-preview-stem">{question.stem}</strong>
+                  <span className="question-preview-tags">{question.tags.join(" / ") || "未标记"}</span>
+                </button>
+              );
+            })}
           </div>
           <button
             className="primary-button full"

@@ -469,6 +469,19 @@ app.post("/api/resources", (req, res) => {
   return res.status(201).json(resource);
 });
 
+app.delete("/api/resources/:resourceId", (req, res) => {
+  const user = requireRole(req, res, ["admin"]);
+  if (!user) return;
+
+  const resource = db.resources.find((item) => item.id === req.params.resourceId);
+  if (!resource) {
+    return sendError(res, 404, "RESOURCE_NOT_FOUND", "资源不存在");
+  }
+
+  db.resources = db.resources.filter((item) => item.id !== resource.id);
+  return res.json({ deleted: resource.id });
+});
+
 function normalizeQuestionInput(input: CreateQuestionInput | UpdateQuestionInput, fallback?: Question) {
   const type = input.type ?? fallback?.type;
   const stem = input.stem ?? fallback?.stem;

@@ -158,6 +158,9 @@ const liveApi = {
   createResource: (input: CreateResourceInput, options?: RequestOptions) =>
     request<Resource>("/resources", { ...options, method: "POST", body: input }),
 
+  deleteResource: (resourceId: string, options?: RequestOptions) =>
+    request<{ deleted: string }>(`/resources/${resourceId}`, { ...options, method: "DELETE" }),
+
   questions: (
     query?: { courseId?: string; difficulty?: Question["difficulty"]; tag?: string },
     options?: RequestOptions,
@@ -647,6 +650,14 @@ const staticApi: typeof liveApi = {
     };
     staticDb.resources.unshift(resource);
     return staticOk(resource);
+  },
+
+  deleteResource: (resourceId: string, options?: RequestOptions) => {
+    staticRequireRole(options, ["admin"]);
+    const resource = staticDb.resources.find((item) => item.id === resourceId);
+    if (!resource) return staticFail(404, "RESOURCE_NOT_FOUND", "资源不存在");
+    staticDb.resources = staticDb.resources.filter((item) => item.id !== resource.id);
+    return staticOk({ deleted: resource.id });
   },
 
   questions: (query?: { courseId?: string; difficulty?: Question["difficulty"]; tag?: string }, options?: RequestOptions) => {
