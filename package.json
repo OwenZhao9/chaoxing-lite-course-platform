@@ -1,0 +1,42 @@
+{
+  "name": "chaoxing-lite-course-platform",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "vite --host 0.0.0.0",
+    "dev:api": "tsx watch server/index.ts",
+    "build": "tsc -b && vite build",
+    "build:pages": "VITE_STATIC_DEMO=true vite build",
+    "lint": "eslint .",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "concurrently": "latest",
+    "cors": "latest",
+    "express": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tsx": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@types/cors": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "globals": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest",
+    "vitest": "latest"
+  }
+}
