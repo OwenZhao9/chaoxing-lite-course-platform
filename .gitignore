@@ -4,3 +4,4 @@ dist/
 .playwright-mcp/
 apikey.txt
 大学英语智课通_交付包.zip
+.vercel

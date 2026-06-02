@@ -11,7 +11,7 @@ import type {
   Submission,
   Unit,
   User,
-} from "../types";
+} from "../types.js";
 
 export const users: User[] = [
   { id: "u-admin", name: "平台管理员", role: "admin", account: "admin", createdAt: "2026-05-01T08:00:00.000Z" },

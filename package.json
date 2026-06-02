@@ -9,6 +9,7 @@
     "dev:api": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
     "build:pages": "VITE_STATIC_DEMO=true vite build",
+    "build:pages:api": "vite build",
     "lint": "eslint .",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run"

@@ -4004,7 +4004,7 @@ function AssistantPage({
 }) {
   return (
     <section className="assistant-page">
-      <PageHeader eyebrow={`${roleLabels[role]} AI 助教`} title="课程上下文智能助手" description="当前为本地 mock 接口，后续可替换为 DeepSeek 或其他大模型服务。" />
+      <PageHeader eyebrow={`${roleLabels[role]} AI 助教`} title="课程上下文智能助手" description="通过后端 AI 接口调用 DeepSeek，围绕当前课程、章节和资源生成回答。" />
       <div className="assistant-layout">
         <AiDock messages={aiMessages} input={aiInput} busy={aiBusy} role={role} onInput={onAiInput} onAsk={onAskAi} expanded />
         <aside className="panel context-panel">

@@ -2,7 +2,7 @@ import cors from "cors";
 import express, { type Request, type Response } from "express";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { mockData } from "../src/data/mockData";
+import { mockData } from "../src/data/mockData.js";
 import type {
   AiAssistantRequest,
   AiAssistantResponse,
@@ -35,7 +35,7 @@ import type {
   UpdateUnitInput,
   User,
   Question,
-} from "../src/types";
+} from "../src/types.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
@@ -1129,6 +1129,10 @@ app.use((_req, res) => {
   sendError(res, 404, "NOT_FOUND", "接口不存在");
 });
 
-app.listen(port, () => {
-  console.log(`Chaoxing lite API listening on http://localhost:${port}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Chaoxing lite API listening on http://localhost:${port}`);
+  });
+}
+
+export default app;
