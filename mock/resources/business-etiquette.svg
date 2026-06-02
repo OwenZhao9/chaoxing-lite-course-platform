@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Business etiquette classroom illustration">
+  <rect width="960" height="540" fill="#f8fafc"/>
+  <rect x="70" y="70" width="820" height="400" rx="24" fill="#ffffff" stroke="#dbe3ef" stroke-width="3"/>
+  <rect x="70" y="70" width="820" height="94" rx="24" fill="#eef7ff"/>
+  <path d="M70 140h820" stroke="#dbeafe" stroke-width="3"/>
+  <text x="112" y="130" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#1261a6">Business Etiquette</text>
+  <text x="112" y="224" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">A respectful greeting opens the conversation.</text>
+  <text x="112" y="268" font-family="Arial, sans-serif" font-size="22" fill="#4b5563">Listen first, speak clearly, and keep the exchange professional.</text>
+  <g transform="translate(130 330)">
+    <rect x="0" y="0" width="260" height="66" rx="18" fill="#eff6ff" stroke="#93c5fd" stroke-width="3"/>
+    <circle cx="38" cy="33" r="15" fill="#2563eb"/>
+    <path d="M31 33l5 5 10-13" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="72" y="41" font-family="Arial, sans-serif" font-size="22" fill="#1f2937">Polite greeting</text>
+  </g>
+  <g transform="translate(426 330)">
+    <rect x="0" y="0" width="260" height="66" rx="18" fill="#ecfdf5" stroke="#86efac" stroke-width="3"/>
+    <circle cx="38" cy="33" r="15" fill="#10b981"/>
+    <path d="M31 33l5 5 10-13" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="72" y="41" font-family="Arial, sans-serif" font-size="22" fill="#1f2937">Active listening</text>
+  </g>
+  <g transform="translate(600 190)">
+    <path d="M62 140c-30 0-54-24-54-54s24-54 54-54c17 0 32 8 42 20 10-12 25-20 42-20 30 0 54 24 54 54s-24 54-54 54c-17 0-32-8-42-20-10 12-25 20-42 20z" fill="#dbeafe"/>
+    <path d="M100 98l-44 38c-10 8-24 7-32-3l-12-14 72-62 24 28" fill="#f59e0b"/>
+    <path d="M110 96l44 38c10 8 24 7 32-3l12-14-72-62-24 28" fill="#2563eb"/>
+    <path d="M79 95l36 32M129 95l-36 32" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="58" cy="16" r="16" fill="#111827"/>
+    <circle cx="150" cy="16" r="16" fill="#111827"/>
+  </g>
+</svg>
